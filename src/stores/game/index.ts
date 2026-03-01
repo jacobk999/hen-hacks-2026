@@ -61,8 +61,7 @@ export const useGameStore = create<GameState & Actions>()(
           eventLog: [],
         }),
 
-      addEvent: (event) =>
-        set((state) => ({ events: [...state.events, event] })),
+      addEvent: (event) => set((state) => ({ events: [...state.events, event] })),
 
       onEventUpdate: (event, choice) =>
         set((state) => {
@@ -74,17 +73,12 @@ export const useGameStore = create<GameState & Actions>()(
             : previousStats;
 
           let effects: { stat: string; change: number }[] = [];
-          const changedKeys = choiceResult.stats
-            ? Object.keys(choiceResult.stats)
-            : [];
+          const changedKeys = choiceResult.stats ? Object.keys(choiceResult.stats) : [];
 
           effects = changedKeys
             .map((key) => {
               const k = key as keyof Stats;
-              const delta =
-                Math.round(
-                  ((newStats[k] ?? 0) - (previousStats[k] ?? 0)) * 100,
-                ) / 100;
+              const delta = Math.round(((newStats[k] ?? 0) - (previousStats[k] ?? 0)) * 100) / 100;
               return { stat: k, change: delta };
             })
             .filter((e) => e.change !== 0);
@@ -102,12 +96,8 @@ export const useGameStore = create<GameState & Actions>()(
             ...choiceResult,
             stats: newStats,
             eventLog: [...state.eventLog, newLogEntry],
-            events: event.repeatable
-              ? eventsList
-              : eventsList.filter((e) => e.id !== event.id),
-            currentEvents: state.currentEvents.filter(
-              (ce) => ce.id !== event.id,
-            ),
+            events: event.repeatable ? eventsList : eventsList.filter((e) => e.id !== event.id),
+            currentEvents: state.currentEvents.filter((ce) => ce.id !== event.id),
           };
         }),
 
@@ -139,8 +129,7 @@ export const useGameStore = create<GameState & Actions>()(
           // Economy
           const moneyMultiplier = 0.5 + stats.customerSatisfaction * 0.2;
           const dailyProfit = stats.dailyProfit * moneyMultiplier;
-          const totalExpenses =
-            finalEmployees * stats.employeeWage + stats.dailyExpenses;
+          const totalExpenses = finalEmployees * stats.employeeWage + stats.dailyExpenses;
           const money = stats.money + (dailyProfit - totalExpenses);
 
           // Check Failure Conditions
@@ -150,8 +139,7 @@ export const useGameStore = create<GameState & Actions>()(
           } else if (finalEmployees <= 10) {
             failReason = "ABANDONMENT: No one is left to operate the subway.";
           } else if (stats.customerSatisfaction <= 0) {
-            failReason =
-              "RIOTS: The city has shuttered your station due to public outcry.";
+            failReason = "RIOTS: The city has shuttered your station due to public outcry.";
           }
 
           if (failReason) {
@@ -166,11 +154,7 @@ export const useGameStore = create<GameState & Actions>()(
           // Event Selection
           const possibleEvents = s.events.filter((event) => event.criteria(s));
           const numberOfEvents = Math.floor(Math.random() * 3) + 2;
-          const chosenEvents = selectUniqueEvents(
-            possibleEvents,
-            numberOfEvents,
-            s.lines,
-          );
+          const chosenEvents = selectUniqueEvents(possibleEvents, numberOfEvents, s.lines);
 
           const currentEvents = chosenEvents.map((event) => ({
             ...event,
@@ -242,8 +226,7 @@ export const useGameStore = create<GameState & Actions>()(
 );
 
 // --- Helpers ---
-const chooseRandomlyFromList = <T>(list: T[]) =>
-  list[Math.floor(Math.random() * list.length)];
+const chooseRandomlyFromList = <T>(list: T[]) => list[Math.floor(Math.random() * list.length)];
 
 const STATION_LINES: Record<string, string[]> = {
   "North Plaza": ["red"],
@@ -257,11 +240,7 @@ const STATION_LINES: Record<string, string[]> = {
   "West End Junction": ["green"],
 };
 
-const selectUniqueEvents = (
-  events: Event[],
-  x: number,
-  lines: Lines,
-): Event[] => {
+const selectUniqueEvents = (events: Event[], x: number, lines: Lines): Event[] => {
   const selected: Event[] = [];
   const pool = [...events];
   const occupiedStations = new Set<string>();
@@ -280,9 +259,7 @@ const selectUniqueEvents = (
       const [event] = pool.splice(pickedIndex, 1);
       const reachableLocations = event.locations.filter((loc) => {
         const lineKeys = STATION_LINES[loc] || [];
-        const isAccessible = lineKeys.some(
-          (key) => lines[key as keyof Lines] !== false,
-        );
+        const isAccessible = lineKeys.some((key) => lines[key as keyof Lines] !== false);
         return isAccessible && !occupiedStations.has(loc);
       });
 

@@ -8,13 +8,7 @@ export function Dialog({ children }: { children: ReactNode }) {
 
 Dialog.Trigger = DialogPrimitive.Trigger;
 
-Dialog.Content = ({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) => {
+Dialog.Content = ({ children, className }: { children: ReactNode; className?: string }) => {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop className="fixed inset-0 min-h-dvh bg-black backdrop-blur-2xl opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 dark:opacity-70 supports-[-webkit-touch-callout:none]:absolute" />

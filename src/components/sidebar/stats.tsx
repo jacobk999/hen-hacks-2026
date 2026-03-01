@@ -20,9 +20,7 @@ export function SubwayStats() {
       <p className="font-semibold text-lg">Stats</p>
       <div>
         <Stat label="Money" icon={CurrencySignDollar}>
-          <span className="text-green-500 font-medium">
-            ${stats.money.toLocaleString()}
-          </span>
+          <span className="text-green-500 font-medium">${stats.money.toLocaleString()}</span>
         </Stat>
         <Stat label="Employees" icon={UserTwo}>
           <span>{stats.employees}</span>
@@ -31,11 +29,7 @@ export function SubwayStats() {
       <div className="flex flex-col gap-2">
         <StatProgress
           label="Customer Satisfaction"
-          icon={
-            stats.customerSatisfaction < 2.5
-              ? ThumbReactionDislike
-              : ThumbReactionLike
-          }
+          icon={stats.customerSatisfaction < 2.5 ? ThumbReactionDislike : ThumbReactionLike}
           value={stats.customerSatisfaction}
           color="bg-amber-500"
         />
@@ -51,12 +45,7 @@ export function SubwayStats() {
           value={stats.security}
           color="bg-blue-500"
         />
-        <StatProgress
-          label="Safety"
-          icon={Shield}
-          value={stats.safety}
-          color="bg-orange-500"
-        />
+        <StatProgress label="Safety" icon={Shield} value={stats.safety} color="bg-orange-500" />
         <StatProgress
           label="Cleanliness"
           icon={CleanBroom}

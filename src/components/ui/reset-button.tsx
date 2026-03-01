@@ -6,11 +6,7 @@ export function ResetButton() {
   return (
     <button
       onClick={() => {
-        if (
-          confirm(
-            "Are you sure? This will wipe all progress and restart the simulation.",
-          )
-        ) {
+        if (confirm("Are you sure? This will wipe all progress and restart the simulation.")) {
           resetGame();
         }
       }}

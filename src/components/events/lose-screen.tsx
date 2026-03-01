@@ -18,15 +18,11 @@ export function LoseDialog() {
 
         <div className="my-8 grid grid-cols-2 gap-4 border-y border-gray-200 py-6 dark:border-gray-800">
           <div className="text-center">
-            <span className="block text-sm uppercase font-bold">
-              Days Managed
-            </span>
+            <span className="block text-sm uppercase font-bold">Days Managed</span>
             <span className="text-2xl font-bold">{day}</span>
           </div>
           <div className="text-center">
-            <span className="block text-sm uppercase font-bold">
-              Final Score
-            </span>
+            <span className="block text-sm uppercase font-bold">Final Score</span>
             <span className="text-2xl font-bold">{score.toLocaleString()}</span>
           </div>
         </div>

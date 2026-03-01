@@ -3,10 +3,7 @@ export interface CurrencySignDollarProps {
   className?: string;
 }
 
-export function CurrencySignDollar({
-  variant,
-  className,
-}: CurrencySignDollarProps) {
+export function CurrencySignDollar({ variant, className }: CurrencySignDollarProps) {
   switch (variant) {
     case "duoStroke":
       return (

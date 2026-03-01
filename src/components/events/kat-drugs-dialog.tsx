@@ -37,8 +37,8 @@ export function KatDrugsDialog({ children }: { children: ReactElement }) {
           Kat, the Drug Sniffing Dog
         </Dialog.Title>
         <Dialog.Description>
-          Kat, the Drug Sniffing Dog, has started pulling torwards a group of
-          suspicous individuals, what should we do?
+          Kat, the Drug Sniffing Dog, has started pulling torwards a group of suspicous individuals,
+          what should we do?
         </Dialog.Description>
         <div className="flex flex-col gap-1 pt-2">
           {/*{event.choices.map((choice) => (

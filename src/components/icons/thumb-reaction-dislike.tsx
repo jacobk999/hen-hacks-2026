@@ -3,10 +3,7 @@ export interface ThumbReactionDislikeProps {
   className?: string;
 }
 
-export function ThumbReactionDislike({
-  variant,
-  className,
-}: ThumbReactionDislikeProps) {
+export function ThumbReactionDislike({ variant, className }: ThumbReactionDislikeProps) {
   switch (variant) {
     case "contrast":
       return (

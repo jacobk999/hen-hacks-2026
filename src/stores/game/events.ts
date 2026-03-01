@@ -70,10 +70,7 @@ export type MultipleChoiceEvent = BaseEvent & {
 
 export type Event = MultipleChoiceEvent | CustomDialogEvent;
 
-export type Current<T extends Event> = Omit<
-  T,
-  "locations" | "weight" | "criteria"
-> & {
+export type Current<T extends Event> = Omit<T, "locations" | "weight" | "criteria"> & {
   location: Location;
 };
 
@@ -255,9 +252,7 @@ export const events: Event[] = [
           const layoffPercent = (Math.floor(Math.random() * 21) + 40) / 100;
 
           // Check how many employees are being laid off
-          const employeesToRemove = -Math.floor(
-            state.stats.employees * layoffPercent,
-          );
+          const employeesToRemove = -Math.floor(state.stats.employees * layoffPercent);
 
           // Get severance pay
           // Example: $5,000 flat + $2,000 per employee removed
@@ -301,8 +296,7 @@ export const events: Event[] = [
     title: "Duncan, the Donut Loving Cop",
     primaryCharacter: "duncan",
     charImage: "public/characters/duncan.png",
-    description:
-      "A police officer wants to buy a donut, but is short on funds. What will you do?",
+    description: "A police officer wants to buy a donut, but is short on funds. What will you do?",
     choices: [
       {
         id: "YesDonut",
@@ -346,8 +340,7 @@ export const events: Event[] = [
     weight: 1000,
     criteria: (s) =>
       s.eventOccurences.some(
-        (occurence) =>
-          occurence.id === "Duncan_1" && occurence.choice === "YesDonut",
+        (occurence) => occurence.id === "Duncan_1" && occurence.choice === "YesDonut",
       ),
   },
   {
@@ -373,8 +366,7 @@ export const events: Event[] = [
     weight: 1000,
     criteria: (s) =>
       s.eventOccurences.some(
-        (occurence) =>
-          occurence.id === "Duncan_1" && occurence.choice === "NoDonut",
+        (occurence) => occurence.id === "Duncan_1" && occurence.choice === "NoDonut",
       ),
   },
   {
@@ -432,8 +424,7 @@ export const events: Event[] = [
     weight: 1000,
     criteria: (state) =>
       state.eventOccurences.some(
-        (occurence) =>
-          occurence.id === "Math_1" && occurence.choice === "DontArrest",
+        (occurence) => occurence.id === "Math_1" && occurence.choice === "DontArrest",
       ),
   },
   {
@@ -441,8 +432,7 @@ export const events: Event[] = [
     title: "The Return of the Arabic Mathematician",
     primaryCharacter: "sathvik",
     charImage: "public/characters/sathvik.png",
-    description:
-      "The mathematician disregards you because you apprehended him.",
+    description: "The mathematician disregards you because you apprehended him.",
     choices: [
       {
         id: "NoFreeMoney",
@@ -455,8 +445,7 @@ export const events: Event[] = [
     weight: 1000,
     criteria: (state) =>
       state.eventOccurences.some(
-        (occurence) =>
-          occurence.id === "Math_1" && occurence.choice === "Arrest",
+        (occurence) => occurence.id === "Math_1" && occurence.choice === "Arrest",
       ),
   },
   {
@@ -569,8 +558,7 @@ export const events: Event[] = [
     weight: 1000,
     criteria: (state) =>
       state.eventOccurences.some(
-        (occurence) =>
-          occurence.id === "NoisePollution" && occurence.choice === "DoNothing",
+        (occurence) => occurence.id === "NoisePollution" && occurence.choice === "DoNothing",
       ),
   },
   {
@@ -604,8 +592,7 @@ export const events: Event[] = [
     weight: 2,
     criteria: (state) =>
       state.eventOccurences.some(
-        (occurence) =>
-          occurence.id === "NoisePollution" && occurence.choice === "DoNothing",
+        (occurence) => occurence.id === "NoisePollution" && occurence.choice === "DoNothing",
       ),
   },
   {
@@ -654,8 +641,7 @@ export const events: Event[] = [
   {
     id: "WeddingRing2",
     title: "A Found Ring",
-    description:
-      "A ring was found on the subway. Who should we call to return it to?",
+    description: "A ring was found on the subway. Who should we call to return it to?",
     choices: [
       {
         id: "302-457-9891",
@@ -686,10 +672,7 @@ export const events: Event[] = [
     locations: allSubwayStations,
     repeatable: false,
     weight: 150,
-    criteria: (state) =>
-      state.eventOccurences.some(
-        (occurence) => occurence.id === "WeddingRing1",
-      ),
+    criteria: (state) => state.eventOccurences.some((occurence) => occurence.id === "WeddingRing1"),
   },
   {
     id: "AppHack",
@@ -733,8 +716,7 @@ export const events: Event[] = [
   {
     id: "DataLeak",
     title: "Data Leak",
-    description:
-      "Your customers' data has been leaked, and you've been served a lawsuit.",
+    description: "Your customers' data has been leaked, and you've been served a lawsuit.",
     choices: [
       {
         id: "PayLawsuit",
@@ -753,15 +735,13 @@ export const events: Event[] = [
     weight: 150,
     criteria: (state) =>
       state.eventOccurences.some(
-        (occurence) =>
-          occurence.id === "AppHack" && occurence.choice == "Do Nothing",
+        (occurence) => occurence.id === "AppHack" && occurence.choice == "Do Nothing",
       ),
   },
   {
     id: "JesusScanner",
     title: "Broken Scanner",
-    description:
-      "Your metro card scanner has malfunctioned. What should we do?",
+    description: "Your metro card scanner has malfunctioned. What should we do?",
     choices: [
       {
         id: "Handyman",
@@ -847,8 +827,7 @@ export const events: Event[] = [
     locations: allSubwayStations,
     repeatable: true,
     weight: 1,
-    criteria: (state) =>
-      state.eventOccurences.some((occurence) => occurence.id === "Duncan_1"),
+    criteria: (state) => state.eventOccurences.some((occurence) => occurence.id === "Duncan_1"),
   },
   {
     id: "Schizo2",
@@ -869,14 +848,12 @@ export const events: Event[] = [
     locations: allSubwayStations,
     repeatable: true,
     weight: 1,
-    criteria: (s) =>
-      !s.eventOccurences.some((occurence) => occurence.id === "Duncan_1"),
+    criteria: (s) => !s.eventOccurences.some((occurence) => occurence.id === "Duncan_1"),
   },
   {
     id: "CSGO",
     title: "Terrorist Attack",
-    description:
-      "A bomb has been planted in one of 3 subway lines. Which one is it?",
+    description: "A bomb has been planted in one of 3 subway lines. Which one is it?",
     choices: [
       {
         id: "Red",
@@ -991,8 +968,7 @@ export const events: Event[] = [
   {
     id: "MommyIssues",
     title: "Lost Kid",
-    description:
-      "A lost child asks you for help finding his mother. What can we do?",
+    description: "A lost child asks you for help finding his mother. What can we do?",
     choices: [
       {
         id: "PaAnnouncement",
@@ -1064,8 +1040,7 @@ export const events: Event[] = [
   {
     id: "Strike",
     title: "Employee Strike",
-    description:
-      "Your employees are unionizing. We have to be smart about this.",
+    description: "Your employees are unionizing. We have to be smart about this.",
     choices: [
       {
         id: "Cave",
@@ -1096,8 +1071,7 @@ export const events: Event[] = [
   {
     id: "StrayDog",
     title: "A Stray Dog",
-    description:
-      "A stray dog wandered into one of our tunnels and is biting people.",
+    description: "A stray dog wandered into one of our tunnels and is biting people.",
     choices: [
       {
         id: "AnimalControl",
@@ -1174,8 +1148,7 @@ export const events: Event[] = [
     weight: 1000,
     criteria: (state) =>
       state.eventOccurences.some(
-        (occurence) =>
-          occurence.id === "Elevator" && occurence.choice == "DoNothing",
+        (occurence) => occurence.id === "Elevator" && occurence.choice == "DoNothing",
       ),
   },
   {
@@ -1183,8 +1156,7 @@ export const events: Event[] = [
     title: "Meeting with Big J",
     primaryCharacter: "bigj",
     charImage: "public/characters/bigj.png",
-    description:
-      "Big J has a new idea for a metro station that exclusively uses cryptocurrency.",
+    description: "Big J has a new idea for a metro station that exclusively uses cryptocurrency.",
     choices: [
       {
         id: "Crypto",
@@ -1321,8 +1293,7 @@ export const events: Event[] = [
   {
     id: "NewHire",
     title: "Hiring Drive",
-    description:
-      "We have the opportunity to run a hiring campaign to build our workforce.",
+    description: "We have the opportunity to run a hiring campaign to build our workforce.",
     choices: [
       {
         id: "LargeHire",
@@ -1484,8 +1455,7 @@ export const events: Event[] = [
   {
     id: "FloodedTunnel",
     title: "Flooded Tunnel",
-    description:
-      "Heavy rain has flooded a tunnel section, halting trains on the affected segment.",
+    description: "Heavy rain has flooded a tunnel section, halting trains on the affected segment.",
     choices: [
       {
         id: "PumpItOut",
@@ -1759,9 +1729,7 @@ export const events: Event[] = [
     repeatable: false,
     weight: 1000,
     criteria: (state) =>
-      state.eventOccurences.some(
-        (o) => o.id === "Kat_1" && o.choice === "InvestigateKat",
-      ),
+      state.eventOccurences.some((o) => o.id === "Kat_1" && o.choice === "InvestigateKat"),
   },
 
   {
@@ -1787,9 +1755,7 @@ export const events: Event[] = [
     repeatable: false,
     weight: 1000,
     criteria: (state) =>
-      state.eventOccurences.some(
-        (o) => o.id === "Kat_1" && o.choice === "IgnoreKat",
-      ),
+      state.eventOccurences.some((o) => o.id === "Kat_1" && o.choice === "IgnoreKat"),
   },
 
   {
@@ -1887,9 +1853,7 @@ export const events: Event[] = [
     repeatable: false,
     weight: 500,
     criteria: (state) =>
-      state.eventOccurences.some(
-        (o) => o.id === "Jessica_1" && o.choice === "AllowJessica",
-      ),
+      state.eventOccurences.some((o) => o.id === "Jessica_1" && o.choice === "AllowJessica"),
   },
 
   {
@@ -1922,9 +1886,7 @@ export const events: Event[] = [
     repeatable: true,
     weight: 500,
     criteria: (state) =>
-      state.eventOccurences.some(
-        (o) => o.id === "Jessica_1" && o.choice === "AllowJessica",
-      ),
+      state.eventOccurences.some((o) => o.id === "Jessica_1" && o.choice === "AllowJessica"),
   },
 
   // ── BIG J ARC (continued) ────────────────────────────────────
@@ -2087,9 +2049,7 @@ export const events: Event[] = [
     repeatable: false,
     weight: 1000,
     criteria: (state) =>
-      state.eventOccurences.some(
-        (o) => o.id === "Sathvik_3" && o.choice === "HireSathvik",
-      ),
+      state.eventOccurences.some((o) => o.id === "Sathvik_3" && o.choice === "HireSathvik"),
   },
 
   // ── SAFETY & SECURITY ────────────────────────────────────────
@@ -2332,8 +2292,7 @@ export const events: Event[] = [
   {
     id: "EmployeeTheft",
     title: "Employee Theft",
-    description:
-      "A staff member has been caught stealing from the ticket revenue.",
+    description: "A staff member has been caught stealing from the ticket revenue.",
     choices: [
       {
         id: "FireThief",
@@ -2966,8 +2925,7 @@ export const events: Event[] = [
   {
     id: "MedicalEmergency",
     title: "Medical Emergency on Platform",
-    description:
-      "A passenger has collapsed on the platform. They are unresponsive.",
+    description: "A passenger has collapsed on the platform. They are unresponsive.",
     choices: [
       {
         id: "CallAmbulanceMed",
@@ -3431,12 +3389,7 @@ export const events: Event[] = [
           }),
       },
     ],
-    locations: [
-      "Central Station",
-      "North Plaza",
-      "Riverside Terminal",
-      "Wild Hen Stadium",
-    ],
+    locations: ["Central Station", "North Plaza", "Riverside Terminal", "Wild Hen Stadium"],
     repeatable: false,
     weight: 0.5,
     criteria: (state) => state.stats.safety < 2.5,
@@ -3841,8 +3794,7 @@ export const events: Event[] = [
     locations: allSubwayStations,
     repeatable: false,
     weight: 1,
-    criteria: (state) =>
-      state.stats.customerSatisfaction < 2 && state.stats.safety < 2,
+    criteria: (state) => state.stats.customerSatisfaction < 2 && state.stats.safety < 2,
   },
 
   {
@@ -4059,8 +4011,7 @@ export const events: Event[] = [
     locations: allSubwayStations,
     repeatable: true,
     weight: 1,
-    criteria: (state) =>
-      state.stats.money < 40000 && state.stats.employeeWellbeing < 3,
+    criteria: (state) => state.stats.money < 40000 && state.stats.employeeWellbeing < 3,
   },
 
   {
@@ -5322,8 +5273,7 @@ export const events: Event[] = [
     locations: allSubwayStations,
     repeatable: true,
     weight: 1,
-    criteria: (state) =>
-      state.stats.cleanliness < 2.5 && state.stats.employeeWellbeing < 2.5,
+    criteria: (state) => state.stats.cleanliness < 2.5 && state.stats.employeeWellbeing < 2.5,
   },
 
   {

@@ -3,10 +3,7 @@ export interface ThumbReactionLikeProps {
   className?: string;
 }
 
-export function ThumbReactionLike({
-  variant,
-  className,
-}: ThumbReactionLikeProps) {
+export function ThumbReactionLike({ variant, className }: ThumbReactionLikeProps) {
   switch (variant) {
     case "contrast":
       return (

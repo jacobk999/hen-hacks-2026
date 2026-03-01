@@ -15,9 +15,7 @@ export async function generateMultipleDynamicEvents({
   stats,
   lines,
   count = 5,
-}: Pick<GameState, "day" | "stats" | "lines"> & { count?: number }): Promise<
-  any[]
-> {
+}: Pick<GameState, "day" | "stats" | "lines"> & { count?: number }): Promise<any[]> {
   const activeLines = Object.entries(lines)
     .filter(([_, status]) => status)
     .map(([line, _]) => `${line} Line`);

@@ -1,9 +1,6 @@
 import { useGameStore } from "~/stores/game/index";
 import { SubwayStats } from "./stats";
-import {
-  generateDynamicEvent,
-  generateMultipleDynamicEvents,
-} from "~/stores/game/gemini";
+import { generateDynamicEvent, generateMultipleDynamicEvents } from "~/stores/game/gemini";
 import { cn } from "~/lib/utils";
 import { PlayBig } from "../icons/play-big";
 import { EventLog } from "../event-log";
@@ -21,9 +18,7 @@ export function Sidebar({ className }: { className?: string }) {
 
   const eventsCompleted = useGameStore(
     (s) =>
-      s.currentEvents.filter(
-        (event) => s.lines[SubwayStationToLine[event.location]],
-      ).length === 0,
+      s.currentEvents.filter((event) => s.lines[SubwayStationToLine[event.location]]).length === 0,
   );
 
   return (

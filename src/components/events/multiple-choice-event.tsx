@@ -19,9 +19,7 @@ export function MultipleChoiceEventDialog({
         render={children}
       />
       <Dialog.Content className="flex flex-col gap-1">
-        <Dialog.Title className="font-bold text-lg capitalize">
-          {event.title}
-        </Dialog.Title>
+        <Dialog.Title className="font-bold text-lg capitalize">{event.title}</Dialog.Title>
         <Dialog.Description>{event.description}</Dialog.Description>
         <div className="flex flex-col gap-1 pt-2">
           {event.choices.map((choice) => (

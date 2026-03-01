@@ -18,13 +18,7 @@ export function Dialog({
   );
 }
 
-Dialog.Content = ({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) => {
+Dialog.Content = ({ children, className }: { children: ReactNode; className?: string }) => {
   return (
     <DialogPrimitive.Portal>
       {/* The backdrop blurs the background game map */}

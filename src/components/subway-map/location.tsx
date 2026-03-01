@@ -45,13 +45,7 @@ export const LocationMarker = ({
   );
 };
 
-const EventDialog = ({
-  event,
-  children,
-}: {
-  event: CurrentEvent;
-  children: ReactElement;
-}) => {
+const EventDialog = ({ event, children }: { event: CurrentEvent; children: ReactElement }) => {
   if ("choices" in event)
     return (
       <MultipleChoiceEventDialog event={event as Current<MultipleChoiceEvent>}>
