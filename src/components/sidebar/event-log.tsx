@@ -1,16 +1,9 @@
 import { useGameStore } from "../../stores/game";
 import { cn } from "~/lib/utils";
-import { useEffect, useRef } from "react";
 
 export function EventLog({ className }: { className?: string }) {
-  const { eventLog, day } = useGameStore();
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [eventLog]);
+  const eventLog = useGameStore((s) => s.eventLog);
+  const day = useGameStore((s) => s.day);
 
   return (
     <div
@@ -20,14 +13,11 @@ export function EventLog({ className }: { className?: string }) {
       )}
     >
       <div className="bg-slate-300 p-2 border-b border-slate-200 flex justify-between items-center">
-        <p className="font-bold text-xs uppercase text-black">System Log</p>
-        <span className="font-bold text-xs text-black">DAY {day}</span>
+        <p className="font-bold text-xs uppercase">System Log</p>
+        <span className="font-bold text-xs">DAY {day}</span>
       </div>
 
-      <div
-        ref={scrollRef}
-        className="flex-grow overflow-y-auto p-2 space-y-3 scrollbar-hide select-none"
-      >
+      <div className="flex-grow overflow-y-auto p-2 space-y-3 scrollbar-hide select-none">
         {eventLog.length === 0 && (
           <p className="text-slate-black text-xs text-center mt-1.5">No data recorded...</p>
         )}
@@ -43,9 +33,9 @@ export function EventLog({ className }: { className?: string }) {
                 isNewDay ? "border-black mt-0.5" : "border-black",
               )}
             >
-              <p className="font-bold uppercase tracking-tight text-black">{event.title}</p>
+              <p className="font-bold uppercase tracking-tight">{event.title}</p>
 
-              {!isNewDay && <p className="text-black italic">{event.choiceTitle}</p>}
+              {!isNewDay && <p className="italic">{event.choiceTitle}</p>}
 
               <div className="mt-0.5 flex flex-col gap-0.5">
                 {event.effects.map((effect, eIndex) => {

@@ -1,14 +1,17 @@
 import { useGameStore } from "../../stores/game";
-import { Dialog } from "../ui/lose"; // Import the blueprint we just made
+import { Dialog } from "../ui/dialog";
 
 export function LoseDialog() {
-  const { isGameOver, score, day, failReason, resetGame } = useGameStore();
+  const isGameOver = useGameStore((s) => s.isGameOver);
+  const score = useGameStore((s) => s.score);
+  const day = useGameStore((s) => s.day);
+  const failReason = useGameStore((s) => s.failReason);
+  const resetGame = useGameStore((s) => s.resetGame);
 
   return (
     <Dialog open={isGameOver}>
-      {/* We don't need {isGameOver && ...} here because the 'open' prop handles it */}
-      <Dialog.Content className="border-t-4 border-red-500 bg-slate-200">
-        <Dialog.Title className="text-center text-4xl font-black text-red-500 uppercase italic tracking-tighter">
+      <Dialog.Content className="border-t-4 border-red-500 bg-slate-200" blur="backdrop-blur-2xl">
+        <Dialog.Title className="text-center text-4xl font-black text-red-500 uppercase tracking-tighter">
           Terminal Failure
         </Dialog.Title>
 
@@ -16,7 +19,7 @@ export function LoseDialog() {
           {failReason}
         </Dialog.Description>
 
-        <div className="my-8 grid grid-cols-2 gap-4 border-y border-gray-200 py-6 dark:border-gray-800">
+        <div className="my-8 grid grid-cols-2 gap-4 border-y border-slate-400 py-6">
           <div className="text-center">
             <span className="block text-sm uppercase font-bold">Days Managed</span>
             <span className="text-2xl font-bold">{day}</span>

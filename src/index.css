@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Circular Std", sans-serif;
+  --font-mono: "Circular Mono", monospace;
+}
+
 * {
   min-width: 0;
   min-height: 0;
@@ -22,9 +27,23 @@ button {
 
 @font-face {
   font-family: "Circular Std";
+  src: url("./fonts/CircularStd-BookItalic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Circular Std";
   src: url("./fonts/CircularStd-Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
+}
+
+@font-face {
+  font-family: "Circular Std";
+  src: url("./fonts/CircularStd-MediumItalic.woff2") format("woff2");
+  font-weight: 500;
+  font-style: italic;
 }
 
 @font-face {
@@ -36,7 +55,28 @@ button {
 
 @font-face {
   font-family: "Circular Std";
+  src: url("./fonts/CircularStd-BoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Circular Std";
   src: url("./fonts/CircularStd-Black.woff2") format("woff2");
   font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Circular Std";
+  src: url("./fonts/CircularStd-BlackItalic.woff2") format("woff2");
+  font-weight: 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Circular Mono";
+  src: url("./fonts/CircularMono-Regular.woff2") format("woff2");
+  font-weight: normal;
   font-style: normal;
 }
