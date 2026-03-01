@@ -15,50 +15,54 @@ export async function generateDynamicEvent(state: GameState): Promise<any> {
   const prompt = `
     Role: You are an unhinged Dungeon Master for a subway management simulator.
 
-        Context:
-        - Current Day: ${day}
-        - Current Stats: ${JSON.stringify(stats)} (Ratings are 0-5 stars. Money is not.)
-        - Economy: Players earn ~$20,000/day. Balance costs accordingly.
+    Context:
+    - Current Day: ${day}
+    - Current Stats: ${JSON.stringify(stats)}
+    - Scale: Ratings are 0-5 stars. Employees is a whole number (currently ${stats.employees}).
+    - Economy: Players earn ~$20,000/day.
+    - Overhead: EVERY employee costs $200/day in salary. Hiring increases long-term costs; firing saves money but hurts wellbeing.
 
-        Geography (The Rail Lines):
-        - Red Line: North Plaza, Central Station, Old Town Square, Riverside Terminal.
-        - Blue Line: Wild Hen Stadium, Central Station, Leo's Landing, Eastside.
-        - Green Line: Old Town Square, West End Junction, Leo's Landing, Three Stop.
-        (Note: Some stations are Transfer Hubs where lines cross).
+    Geography (The Rail Lines):
+    - Red Line: North Plaza, Central Station, Old Town Square, Riverside Terminal.
+    - Blue Line: Wild Hen Stadium, Central Station, Leo's Landing, Eastside.
+    - Green Line: Old Town Square, West End Junction, Leo's Landing, Three Stop.
+    (Note: Some stations are Transfer Hubs where lines cross).
 
-        Escalation Logic:
-        1. Days 1-20 (Grounded): Mundane urban issues.
-        2. Days 21-49 (Chaotic): Urban legends, sentient grime, cryptids.
-        3. Day 50+ (Fantasy): Lovecraftian rifts, asteroid impacts, magic, monsters. Costs and consequences should be much higher.
+    Escalation Logic:
+    1. Days 1-20 (Grounded): Mundane urban issues.
+    2. Days 21-49 (Chaotic): Urban legends, sentient grime, cryptids.
+    3. Day 50+ (Fantasy): Lovecraftian rifts, asteroid impacts, magic, monsters. Costs and consequences should be much higher.
 
-        Strict Constraints for "delta" values:
-        - Star Ratings (safety, cleanliness, etc.): Changes must be SMALL (e.g., -0.1 to +0.3). Never more than 0.5.
-        - Money: Use the $20,000/day income as a baseline. Repairs = $500-$5,000. Catastrophes = $10,000-$40,000.
-        - Choices: Make the choices phrases up to 7 words with no periods at the end.
-        - Geography: If the "description" mentions tracks/rails, ensure it correctly identifies the Line Color based on the location.
+    Strict Constraints for "delta" values:
+    - Star Ratings: Changes must be SMALL (e.g., -0.1 to +0.3). Never more than 0.5.
+    - Employees: Can be positive (hiring) or negative (firing/death). Usually 1-5, but up to 20 in disasters.
+    - Money: Repairs/severance = $500-$5,000. Catastrophes = $10,000-$40,000.
+    - Choices: Phrases up to 7 words with no periods at the end.
+    - Geography: If the "description" mentions tracks/rails, ensure it correctly identifies the Line Color based on the location.
 
-        Return ONLY raw JSON matching this schema:
+    Return ONLY raw JSON matching this schema:
+    {
+      "id": "unique_string",
+      "title": "string",
+      "description": "string",
+      "locations": ["Valid Location"],
+      "choices": [
         {
-          "id": "unique_string",
-          "title": "string",
-          "description": "string",
-          "locations": ["Valid Location"],
-          "choices": [
-            {
-              "id": "string",
-              "label": "string",
-              "delta": {
-                 "money": number,
-                 "safety": number,
-                 "customerSatisfaction": number,
-                 "cleanliness": number,
-                 "employeeWellbeing": number,
-                 "security": number,
-                 "environment": number
-              }
-            }
-          ]
+          "id": "string",
+          "label": "string",
+          "delta": {
+             "money": number,
+             "employees": number,
+             "safety": number,
+             "customerSatisfaction": number,
+             "cleanliness": number,
+             "employeeWellbeing": number,
+             "security": number,
+             "environment": number
+          }
         }
+      ]
+    }
     `;
 
   const result = await model.generateContent(prompt);

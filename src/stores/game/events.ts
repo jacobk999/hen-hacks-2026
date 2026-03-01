@@ -677,14 +677,14 @@ export const events: Event[] = [
     criteria: () => true,
   },
   {
-    id: "",
-    title: "Nigerian Prince",
+    id: "WeddingRing1",
+    title: "A Lost Ring",
     description:
-      "An Email Came into Your Inbox, You Are the Sole Heir to a Nigerian Prince's Fortune, but need to Pay $5000 to receive it. What Do You Wish To Do",
+      "A man lost his wedding ring riding your subway, and tells you to call 302-457-9891 if it is found",
     choices: [
       {
-        id: "PayPrince",
-        label: "Pay the Prince",
+        id: "Continue",
+        label: "Continue",
         onSelect: (state) => ({
           stats: {
             ...state.stats,
@@ -692,11 +692,6 @@ export const events: Event[] = [
             security: state.stats.security - 0.2,
           },
         }),
-      },
-      {
-        id: "Ignore",
-        label: "Ignore",
-        onSelect: () => {},
       },
     ],
     locations: allSubwayStations,

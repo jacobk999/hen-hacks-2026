@@ -16,12 +16,12 @@ export const stats: Stats = {
   money: 100_000,
   minimumDailyExpenses: 10_000,
   employees: 50,
-  customerSatisfaction: (Math.floor(Math.random() * 110) + 150) / 100,
-  employeeWellbeing: (Math.floor(Math.random() * 110) + 150) / 100,
-  security: (Math.floor(Math.random() * 110) + 150) / 100,
-  safety: (Math.floor(Math.random() * 110) + 150) / 100,
-  cleanliness: (Math.floor(Math.random() * 110) + 150) / 100,
-  environment: (Math.floor(Math.random() * 110) + 150) / 100,
+  customerSatisfaction: 2.5,
+  employeeWellbeing: 2.5,
+  security: 2.5,
+  safety: 2.5,
+  cleanliness: 2.5,
+  environment: 2.5,
 };
 
 export const updateStats = (
