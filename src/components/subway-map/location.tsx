@@ -1,8 +1,15 @@
-import type { CurrentEvent, Location } from "~/stores/game/events";
+import {
+  type Current,
+  type CurrentEvent,
+  type CustomDialogEvent,
+  type Location,
+  type MultipleChoiceEvent,
+} from "~/stores/game/events";
+import { SubwayStationToLine } from "~/stores/game/location";
 import { useGameStore } from "~/stores/game/index";
-import { Dialog } from "~/components/ui/dialog";
-import type { ReactNode } from "react";
+import type { ReactElement } from "react";
 import { cn } from "~/lib/utils";
+import { MultipleChoiceEventDialog } from "../events/multiple-choice-event";
 
 export const LocationMarker = ({
   location,
@@ -12,12 +19,21 @@ export const LocationMarker = ({
   className?: string;
 }) => {
   const currentEvents = useGameStore((s) => s.currentEvents);
+  const lines = useGameStore((s) => s.lines);
   const event = currentEvents.find((event) => event.location === location);
 
   return (
     <div className={cn("m-4 relative", className)}>
-      {event ? (
-        <EventDialog event={event}></EventDialog>
+      {event && lines[SubwayStationToLine[location]] ? (
+        <EventDialog event={event}>
+          <button
+            type="button"
+            className="relative rounded-full flex outline-4 outline-white h-full w-full"
+          >
+            <span className="absolute inline-flex w-full h-full animate-ping rounded-full bg-red-500 opacity-60"></span>
+            <span className="relative inline-flex w-full h-full rounded-full bg-red-500"></span>
+          </button>
+        </EventDialog>
       ) : (
         <div className="rounded-full bg-slate-200 outline-4 outline-white w-full h-full" />
       )}
@@ -29,32 +45,21 @@ export const LocationMarker = ({
   );
 };
 
-const EventDialog = ({ event }: { event: CurrentEvent }) => {
-  const onEventUpdate = useGameStore((s) => s.onEventUpdate);
+const EventDialog = ({
+  event,
+  children,
+}: {
+  event: CurrentEvent;
+  children: ReactElement;
+}) => {
+  if ("choices" in event)
+    return (
+      <MultipleChoiceEventDialog event={event as Current<MultipleChoiceEvent>}>
+        {children}
+      </MultipleChoiceEventDialog>
+    );
 
-  return (
-    <Dialog>
-      <Dialog.Trigger className="relative rounded-full flex outline-4 outline-white h-full w-full">
-        <span className="absolute inline-flex w-full h-full animate-ping rounded-full bg-red-400 opacity-60"></span>
-        <span className="relative inline-flex w-full h-full rounded-full bg-red-400"></span>
-      </Dialog.Trigger>
-      <Dialog.Content className="flex flex-col gap-1">
-        <Dialog.Title className="font-bold text-lg capitalize">
-          {event.title}
-        </Dialog.Title>
-        <Dialog.Description>{event.description}</Dialog.Description>
-        <div className="flex flex-col gap-1 pt-2">
-          {event.choices.map((choice) => (
-            <Dialog.Close
-              key={choice.id}
-              onClick={() => onEventUpdate(event, choice)}
-              className="bg-red-400 rounded-lg p-2 font-medium text-white"
-            >
-              {choice.label}
-            </Dialog.Close>
-          ))}
-        </div>
-      </Dialog.Content>
-    </Dialog>
-  );
+  const { dialog: Dialog } = event as Current<CustomDialogEvent>;
+
+  return <Dialog>{children}</Dialog>;
 };

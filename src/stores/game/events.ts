@@ -1,5 +1,6 @@
-import type { GameState } from ".";
+import type { ComponentType, ReactElement } from "react";
 import { updateStats } from "./stats";
+import type { GameState } from ".";
 
 export type SubwayStation =
   | "West End Junction"
@@ -11,6 +12,8 @@ export type SubwayStation =
   | "Central Station"
   | "North Plaza"
   | "Old Town Square";
+
+export type SubwayLine = "red" | "blue" | "green";
 
 const allSubwayStations: SubwayStation[] = [
   "West End Junction",
@@ -35,25 +38,39 @@ export type Choice = {
 export type EventOccurence = {
   id: Event["id"];
   day: number;
-  choice: Event["choices"][number]["id"];
+  choice: string;
   location: Location;
 };
 
-export type Event = {
-  // Marker coordinate at a given point. Consistent/pre-designated.
+type BaseEvent = {
   id: string;
-  title: string;
-  description: string;
-  choices: Choice[];
   locations: Location[];
   repeatable: boolean;
   weight: number;
+  primaryCharacter?: string;
   criteria: (state: GameState) => boolean;
 };
 
-export type CurrentEvent = Omit<Event, "locations" | "weight" | "criteria"> & {
+export type CustomDialogEvent = BaseEvent & {
+  dialog: ComponentType<{ children: ReactElement }>;
+};
+
+export type MultipleChoiceEvent = BaseEvent & {
+  title: string;
+  description: string;
+  choices: Choice[];
+};
+
+export type Event = MultipleChoiceEvent | CustomDialogEvent;
+
+export type Current<T extends Event> = Omit<
+  T,
+  "locations" | "weight" | "criteria"
+> & {
   location: Location;
 };
+
+export type CurrentEvent = Current<Event>;
 
 export const events: Event[] = [
   {
@@ -283,6 +300,7 @@ export const events: Event[] = [
   {
     id: "Duncan_1",
     title: "Duncan, the Donut loving Cop",
+    primaryCharacter: "duncan",
     description:
       "A police officer wants to buy a donut, but is short on funds, what will you do?",
     choices: [
@@ -477,7 +495,7 @@ export const events: Event[] = [
     criteria: () => true,
   },
   {
-    id: "",
+    id: "smoking",
     title: "Is smoking allowed",
     description:
       "You currently have no rule on smoking, which negatively affects the enviroment, by polluting the air, and contributing to deforestation, what stance will you take?",
@@ -688,14 +706,595 @@ export const events: Event[] = [
         onSelect: (state) => ({
           stats: {
             ...state.stats,
-            money: state.stats.money - 5000,
-            security: state.stats.security - 0.2,
           },
         }),
       },
     ],
     locations: allSubwayStations,
     repeatable: false,
+    weight: 150,
+    criteria: () => true,
+  },
+  {
+    id: "WeddingRing2",
+    title: "A Found Ring",
+    description:
+      "A ring was found on the subway, who should we call to return it to?",
+    choices: [
+      {
+        id: "302-457-9891",
+        label: "302-457-9891",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction + 0.43,
+          },
+        }),
+      },
+      {
+        id: "302-457-9091",
+        label: "302-457-9091",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.34,
+          },
+        }),
+      },
+      {
+        id: "PawnRing",
+        label: "Pawn off the ring",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.63,
+            money: state.stats.money + 2500,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: false,
+    weight: 150,
+    criteria: (state) =>
+      state.eventOccurences.some(
+        (occurence) => occurence.id === "WeddingRing1",
+      ),
+  },
+  {
+    id: "AppHack",
+    title: "Metro App Hack",
+    description:
+      "Our security has been breached on our Metro App, and sensitive Data is vulnerable, what should we do?",
+    choices: [
+      {
+        id: "Hire",
+        label: "Hire A Cybersecurity Expert named Ayden C. Herold",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            money: state.stats.money - 6000,
+            security: state.stats.security + 0.4,
+          },
+        }),
+      },
+      {
+        id: "Do Nothing",
+        label: "302-457-9091",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            security: state.stats.security - 0.3,
+          },
+        }),
+      },
+      {
+        id: "RemoveApp",
+        label: "Get Rid of the App",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.33,
+            money: state.stats.money - 500,
+            employeeWellbeing: state.stats.employeeWellbeing - 0.2,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: false,
+    weight: 150,
+    criteria: () => true,
+  },
+  {
+    id: "DataLeak",
+    title: "Data Leak",
+    description:
+      "Your customers data has been leaked, and you've been served a lawsuit",
+    choices: [
+      {
+        id: "PayLawsuit",
+        label: "Pay the Lawsuit",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            money: state.stats.money - 50000,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.55,
+            security: state.stats.security - 0.3,
+            employeeWellbeing: state.stats.employeeWellbeing - 0.3,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: false,
+    weight: 150,
+    criteria: (state) =>
+      state.eventOccurences.some(
+        (occurence) =>
+          occurence.id === "AppHack" && occurence.choice == "Do Nothing",
+      ),
+  },
+  {
+    id: "JesusScanner",
+    title: "Broken Scanner",
+    description:
+      "Your metro card scanner has malfunctioned, what should we do?",
+    choices: [
+      {
+        id: "Handyman",
+        label: "Dispatch a handyman",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.1,
+            cleanliness: state.stats.cleanliness - 0.1,
+            employeeWellbeing: state.stats.employeeWellbeing + 0.1,
+            money: state.stats.money - 1220,
+          },
+        }),
+      },
+      {
+        id: "Employee",
+        label: "Have an Employee Scan cards",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            employeeWellbeing: state.stats.employeeWellbeing - 0.2,
+          },
+        }),
+      },
+      {
+        id: "Nothing",
+        label: "Do nothing, and lose profits",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction + 0.3,
+            money: state.stats.money - 15000,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
+    weight: 150,
+    criteria: () => true,
+  },
+  // {
+  //   id: "Kat1",
+  //   dialog: KatDrugsDialog,
+  //   // title: "Kat, the Drug Sniffing Dog",
+  //   // description:
+  //   //   "Kat, the Drug Sniffing Dog, has started pulling torwards a group of suspicous individuals, what should we do?",
+  //   // choices: [
+  //   //   {
+  //   //     id: "Run",
+  //   //     label: "Let the dog run ahead",
+  //   //     onSelect: (state) => ({
+  //   //       stats: {
+  //   //         ...state.stats,
+  //   //       },
+  //   //     }),
+  //   //   },
+  //   //   {
+  //   //     id: "Stop",
+  //   //     label: "Stop the dog",
+  //   //     onSelect: (state) => ({
+  //   //       stats: {
+  //   //         ...state.stats,
+  //   //       },
+  //   //     }),
+  //   //   },
+  //   // ],
+  //   locations: allSubwayStations,
+  //   repeatable: false,
+  //   weight: 150,
+  //   criteria: () => true,
+  // },
+  {
+    id: "Schizo",
+    title: "Harrasment",
+    description:
+      "There is a mnetally ill passenger who is harrasing other passengers, what should we do?",
+    choices: [
+      {
+        id: "Duncan",
+        label: "Have Duncan the Donut Cop restrain him",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            safety: state.stats.safety + 0.1,
+            customerSatisfaction: state.stats.customerSatisfaction + 0.1,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
+    weight: 150,
+    criteria: (state) =>
+      state.eventOccurences.some((occurence) => occurence.id === "Duncan_1"),
+  },
+  {
+    id: "Schizo2",
+    title: "Harrasment",
+    description:
+      "There is a mentally ill passenger who is harrasing other passengers, what should we do?",
+    choices: [
+      {
+        id: "DoNothing",
+        label: "I don't know any police...",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            safety: state.stats.safety - 0.2,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.2,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
+    weight: 150,
+    criteria: (s) =>
+      !s.eventOccurences.some((occurence) => occurence.id === "Duncan_1"),
+  },
+  {
+    id: "CSGO",
+    title: "Terrorist Attack",
+    description:
+      "A bomb has been planted in one of 3 subway lines, which one is it?",
+    choices: [
+      {
+        id: "Red",
+        label: "Red Line",
+        onSelect: (state) => ({
+          lines: { ...state.lines, green: false },
+          stats: {
+            ...state.stats,
+            safety: state.stats.safety - 0.8,
+            money: state.stats.money - 10000,
+            employeeWellbeing: state.stats.employeeWellbeing - 1.2,
+            customerSatisfaction: state.stats.customerSatisfaction - 1.5,
+          },
+        }),
+      },
+      {
+        id: "Blue",
+        label: "Blue Line",
+        onSelect: (state) => ({
+          lines: { ...state.lines, green: false },
+          stats: {
+            ...state.stats,
+            safety: state.stats.safety - 0.8,
+            money: state.stats.money - 10000,
+            employeeWellbeing: state.stats.employeeWellbeing - 1.2,
+            customerSatisfaction: state.stats.customerSatisfaction - 1.5,
+          },
+        }),
+      },
+      {
+        id: "Green",
+        label: "Green Line",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            safety: state.stats.safety + 0.8,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: false,
+    weight: 150,
+    criteria: () => true,
+  },
+  {
+    id: "CSGO_FIX",
+    title: "Fix the Green Line?",
+    description: "A bomb blew up the Green Line. Will you fix it?",
+    choices: [
+      {
+        id: "yes",
+        label: "We Desperately Need It",
+        onSelect: (state) => ({
+          lines: { ...state.lines, green: true },
+          stats: {
+            ...state.stats,
+            safety: state.stats.safety - 0.8,
+            money: state.stats.money - 50000,
+            employeeWellbeing: state.stats.employeeWellbeing - 1.2,
+            customerSatisfaction: state.stats.customerSatisfaction - 1.5,
+          },
+        }),
+      },
+      {
+        id: "no",
+        label: "Subway is Doing Just Fine Without It",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            safety: state.stats.safety - 1.8,
+            employeeWellbeing: state.stats.employeeWellbeing - 2.0,
+            customerSatisfaction: state.stats.customerSatisfaction - 1.5,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
+    weight: 1000,
+    criteria: (s) => !s.lines.green,
+  },
+  {
+    id: "IBQ2",
+    title: "Mysterious Video Game",
+    description:
+      "A mysterious man offers to sell you a video game that contains magical properties, for the low price of $1,000",
+    choices: [
+      {
+        id: "Buy",
+        label: "Purchase the game",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            money: state.stats.money - 1000,
+            customerSatisfaction: state.stats.customerSatisfaction + 5,
+            cleanliness: state.stats.cleanliness + 5,
+            security: state.stats.security + 5,
+            employeeWellbeing: state.stats.employeeWellbeing + 5,
+          },
+        }),
+      },
+      {
+        id: "NoDeal",
+        label: "Walk away",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: false,
+    weight: 150,
+    criteria: () => true,
+  },
+  {
+    id: "MommyIssues",
+    title: "Lost Kid",
+    description:
+      "A lost child asks you for help finding his mother, what can we do?",
+    choices: [
+      {
+        id: "PaAnnouncement",
+        label: "Pa announcement",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction + 0.1,
+            safety: state.stats.safety + 0.05,
+          },
+        }),
+      },
+      {
+        id: "AmberAlert",
+        label: "Amber Alert",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            money: state.stats.money - 1000,
+            customerSatisfaction: state.stats.customerSatisfaction + 0.2,
+            safety: state.stats.safety + 0.2,
+          },
+        }),
+      },
+      {
+        id: "NA",
+        label: 'Tell the kid to "tough it out"',
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            safety: state.stats.safety - 0.2,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.2,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
+    weight: 150,
+    criteria: (s) =>
+      // wait at least 7 days since last occurence of MommyIssues
+      s.eventOccurences
+        .filter((event) => event.id === "MommyIssues")
+        .every((event) => s.day - event.day > 7),
+  },
+  {
+    id: "Detatch",
+    title: "Car Detachment",
+    description: "A car has detatched from the train, we need to think fast.",
+    choices: [
+      {
+        id: "Stop all trains",
+        label: "Stop all trains",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            safety: state.stats.safety + 0.2,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.2,
+          },
+        }),
+      },
+      {
+        id: "Use the next train as a booster",
+        label: "Use the next train as a booster",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction + 0.1,
+            safety: state.stats.safety - 1.1,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
+    weight: 150,
+    criteria: () => true,
+  },
+  {
+    id: "Strike",
+    title: "Employee Strike",
+    description:
+      "Your employees are unionizing, we have to be smart about this.",
+    choices: [
+      {
+        id: "Cave",
+        label: "Cave",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            money: state.stats.money - 10000,
+            employeeWellbeing: state.stats.employeeWellbeing + 0.5,
+            employeeWage: state.stats.employeeWage + 50,
+            customerSatisfaction: state.stats.customerSatisfaction + 0.15,
+          },
+        }),
+      },
+      {
+        id: "ForceWork",
+        label: "Force Work",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.5,
+            employeeWellbeing: state.stats.employeeWellbeing - 0.5,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
+    weight: 150,
+    criteria: () => true,
+  },
+  /*updateStats(state, {
+    money: -(Math.floor(Math.random() * 700) + 800),
+    customerSatisfaction: 0.2,
+    safety: 0.2,
+    environment: 0.2,
+  }), */
+  {
+    id: "StrayDog",
+    title: "A Stray Dog",
+    description:
+      "A stray dog wondered into one of our tunnels is biting people",
+    choices: [
+      {
+        id: "AnimalControl",
+        label: "Call Animal Control",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            money: state.stats.money - 5000,
+            customerSatisfaction: state.stats.customerSatisfaction + 0.1,
+            security: state.stats.security + 0.1,
+          },
+        }),
+      },
+      {
+        id: "Be cheap and ignore it",
+        label: "Be cheap and ignore it",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.25,
+            security: state.stats.security - 0.25,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
+    weight: 150,
+    criteria: () => true,
+  },
+  {
+    id: "Elevator",
+    title: "ElevatorBreakdown",
+    description: "An elevator is malfunctioning, what do you do?",
+    choices: [
+      {
+        id: "Send",
+        label: "Send an Elevator Technician",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            money: state.stats.money - 10000,
+            customerSatisfaction: state.stats.customerSatisfaction + 0.1,
+            cleanliness: state.stats.cleanliness + 0.1,
+          },
+        }),
+      },
+      {
+        id: "DoNothing",
+        label: "Do Nothing",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            customerSatisfaction: state.stats.customerSatisfaction - 0.15,
+            cleanliness: state.stats.cleanliness - 0.1,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
+    weight: 150,
+    criteria: () => true,
+  },
+  {
+    id: "Handicap",
+    title: "Handicap Access",
+    description:
+      "A lawsuit has appeared, as there is no access for wheelchair users due to a broken elevator",
+    choices: [
+      {
+        id: "Continue",
+        label: "Continue",
+        onSelect: (state) => ({
+          stats: {
+            ...state.stats,
+            money: state.stats.money - 25000,
+          },
+        }),
+      },
+    ],
+    locations: allSubwayStations,
+    repeatable: true,
     weight: 150,
     criteria: () => true,
   },

@@ -22,13 +22,13 @@ export function Leaf({ variant, className }: LeafProps) {
           <path
             d="M13 10.5C13 10.5 5 14 5 20.5"
             stroke="currentColor"
-            stroke-width="2"
+            strokeWidth="2"
             fill="none"
           />
           <path
             d="M5.33932 18.2119C0.33921 2.71194 15.5002 7 19.0002 3C22.0816 14.5 17.8393 22.7119 5.33932 18.2119Z"
             stroke="currentColor"
-            stroke-width="2"
+            strokeWidth="2"
             fill="none"
           />
         </svg>

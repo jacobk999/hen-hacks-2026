@@ -17,10 +17,10 @@ export function SubwayStats() {
 
   return (
     <div className="w-full flex flex-col gap-1 p-2 bg-slate-200 rounded-lg">
-      <p className="font-bold text-lg">Stats</p>
+      <p className="font-semibold text-lg">Stats</p>
       <div>
         <Stat label="Money" icon={CurrencySignDollar}>
-          <span className="text-green-400 font-medium">
+          <span className="text-green-500 font-medium">
             ${stats.money.toLocaleString()}
           </span>
         </Stat>
@@ -37,27 +37,37 @@ export function SubwayStats() {
               : ThumbReactionLike
           }
           value={stats.customerSatisfaction}
+          color="bg-amber-500"
         />
         <StatProgress
           label="Employee Wellbeing"
           icon={stats.employeeWellbeing < 2.5 ? FaceSad : FaceSmile}
           value={stats.employeeWellbeing}
+          color="bg-purple-500"
         />
         <StatProgress
           label="Security"
           icon={stats.security < 2.5 ? LockOpen : LockOpen}
           value={stats.security}
+          color="bg-blue-500"
         />
-        <StatProgress label="Safety" icon={Shield} value={stats.safety} />
+        <StatProgress
+          label="Safety"
+          icon={Shield}
+          value={stats.safety}
+          color="bg-orange-500"
+        />
         <StatProgress
           label="Cleanliness"
           icon={CleanBroom}
           value={stats.cleanliness}
+          color="bg-cyan-500"
         />
         <StatProgress
           label="Eco-Friendliness"
           icon={Leaf}
           value={stats.environment}
+          color="bg-emerald-400"
         />
       </div>
     </div>
@@ -86,15 +96,17 @@ function StatProgress({
   icon: Icon,
   label,
   value,
+  color,
 }: {
   icon: ComponentType<{ variant: "stroke"; className?: string }>;
   label: string;
   value: number;
+  color: string;
 }) {
   return (
-    <Progress value={value * 20} min={0} max={100}>
+    <Progress value={value * 20} min={0} max={100} color={color}>
       <div className="flex items-center gap-1">
-        <Icon className="size-4" variant="stroke" />
+        <Icon className="size-4 shrink-0" variant="stroke" />
         <span>{label}</span>
       </div>
     </Progress>

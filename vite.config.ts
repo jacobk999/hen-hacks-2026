@@ -7,6 +7,9 @@ import { resolve } from "node:path";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   assetsInclude: ["**/*.woff2"],
+  server: {
+    allowedHosts: ["a81d-2600-4040-7c57-1800-00-168f.ngrok-free.app"],
+  },
   resolve: {
     alias: {
       "~": resolve(__dirname, "./src"),

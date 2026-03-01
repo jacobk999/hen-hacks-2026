@@ -8,6 +8,7 @@ import {
   type EventOccurence,
 } from "./events";
 import { stats, type Stats } from "./stats";
+import { lines, type Lines } from "./lines";
 
 export type GameState = {
   eventOccurences: EventOccurence[];
@@ -15,6 +16,7 @@ export type GameState = {
   currentEvents: CurrentEvent[];
   characters: Character[];
   stats: Stats;
+  lines: Lines;
   day: number;
 };
 
@@ -30,30 +32,75 @@ export const useGameStore = create<GameState & Actions>((set) => ({
   events,
   currentEvents: [],
   stats,
+  lines,
   day: 0,
 
   // actions
   newDay: () =>
     set((s) => {
-      const money = s.stats.money + 20_000;
+      const stats = s.stats;
 
+      // --- 1. Mass Resignation Logic ---
+      // If wellbeing < 1.75 (35% of 5 stars), up to 20% leave
+      let employeesLost = 0;
+      const wellbeingPercent = stats.employeeWellbeing / 5;
+      if (wellbeingPercent < 0.35) {
+        // Linear scale: At 35% wellbeing -> 0% leave. At 0% wellbeing -> 20% leave.
+        const leaveRate = ((0.35 - wellbeingPercent) / 0.35) * 0.2;
+        employeesLost = Math.floor(stats.employees * leaveRate);
+      }
+      const finalEmployees = Math.max(0, stats.employees - employeesLost);
+
+      // --- 2. Understaffing Decay ---
+      // Below 30 employees, stats decay. Max decay at 10 employees.
+      let decayMultiplier = 0;
+      if (finalEmployees < 30) {
+        // Scale from   30 (0% decay) down to 10 (100% of max decay)
+        decayMultiplier = Math.min(1, (30 - finalEmployees) / 20);
+      }
+
+      const applyDecay = (val: number) => {
+        if (decayMultiplier <= 0) return val;
+        const amount = Math.max(val * 0.2, 0.2) * decayMultiplier;
+        return Math.round(Math.max(0, val - amount) * 100) / 100;
+      };
+
+      // Economy
+      const moneyMultiplier = 0.5 + stats.customerSatisfaction * 0.2;
+      const dailyProfit = stats.dailyProfit * moneyMultiplier;
+      const totalExpenses =
+        finalEmployees * stats.employeeWage + stats.dailyExpenses;
+      const money = stats.money + (dailyProfit - totalExpenses);
+
+      // Event Selection
       const possibleEvents = s.events.filter((event) => event.criteria(s));
-
       const numberOfEvents = Math.floor(Math.random() * 3) + 2;
-      const chosenEvents = selectUniqueEvents(possibleEvents, numberOfEvents);
-      const currentEvents: CurrentEvent[] = chosenEvents.map((event) => ({
-        id: event.id,
-        title: event.title,
-        description: event.description,
-        choices: event.choices,
+      const chosenEvents = selectUniqueEvents(
+        possibleEvents,
+        numberOfEvents,
+        s.lines,
+      );
+      const currentEvents = chosenEvents.map((event) => ({
+        ...event,
         location: chooseRandomlyFromList(event.locations),
-        repeatable: event.repeatable,
       }));
 
       return {
-        stats: { ...s.stats, money },
         day: s.day + 1,
         currentEvents,
+        stats: {
+          ...stats,
+          money,
+          employees: finalEmployees,
+          totalExpenses,
+          // Apply decay to all quality stats
+          safety: applyDecay(stats.safety),
+          security: applyDecay(stats.security),
+          cleanliness: applyDecay(stats.cleanliness),
+          environment: applyDecay(stats.environment),
+          customerSatisfaction: applyDecay(stats.customerSatisfaction),
+          employeeWellbeing: applyDecay(stats.employeeWellbeing),
+        },
       };
     }),
 
@@ -79,51 +126,68 @@ export const useGameStore = create<GameState & Actions>((set) => ({
 const chooseRandomlyFromList = <T>(list: T[]) =>
   list[Math.floor(Math.random() * list.length)];
 
-const selectUniqueEvents = (events: Event[], x: number): Event[] => {
+const STATION_LINES: Record<string, string[]> = {
+  "North Plaza": ["red"],
+  "Central Station": ["red", "blue"],
+  "Old Town Square": ["red", "green"],
+  "Riverside Terminal": ["red"],
+  "Wild Hen Stadium": ["blue"],
+  "Leo's Landing": ["blue", "green"],
+  Eastside: ["blue"],
+  "Three Stop": ["green"],
+  "West End Junction": ["green"],
+};
+
+const selectUniqueEvents = (
+  events: Event[],
+  x: number,
+  lines: any,
+): Event[] => {
   const selected: Event[] = [];
   const pool = [...events];
-
-  // Track specific stations that are already "busy" this turn
   const occupiedStations = new Set<string>();
 
-  // Use a while loop to ensure we try to fill 'x' slots
   while (selected.length < x && pool.length > 0) {
     const totalWeight = pool.reduce((acc, e) => acc + e.weight, 0);
     let random = Math.random() * totalWeight;
 
-    let pickedIndex = -1;
-    for (let j = 0; j < pool.length; j++) {
-      if (random < pool[j].weight) {
-        pickedIndex = j;
-        break;
-      }
-      random -= pool[j].weight;
-    }
+    const pickedIndex = pool.findIndex((e) => {
+      if (random < e.weight) return true;
+      random -= e.weight;
+      return false;
+    });
 
     if (pickedIndex !== -1) {
-      // Extract the event from the pool
       const [event] = pool.splice(pickedIndex, 1);
 
-      // Find which of this event's locations are actually free
-      const freeLocations = event.locations.filter(
-        (loc) => !occupiedStations.has(loc),
-      );
+      // Filter for stations that have at least one active line
+      const reachableLocations = event.locations.filter((loc) => {
+        const lineKeys = STATION_LINES[loc] || [];
 
-      if (freeLocations.length > 0) {
-        // Pick one of the locations
+        // A station is UP if ANY of its lines are true (enabled)
+        const isAccessible = lineKeys.some((key) => {
+          if (key === "red") return lines.red !== false;
+          if (key === "blue") return lines.blue !== false;
+          if (key === "green") return lines.green !== false;
+          return true;
+        });
+
+        return isAccessible && !occupiedStations.has(loc);
+      });
+
+      if (reachableLocations.length > 0) {
         const finalLocation =
-          freeLocations[Math.floor(Math.random() * freeLocations.length)];
+          reachableLocations[
+            Math.floor(Math.random() * reachableLocations.length)
+          ];
 
-        // Push a copy of the event, but force its locations array to only be the one station we picked.
         selected.push({
           ...event,
           locations: [finalLocation],
         });
 
-        // Mark that station as taken
         occupiedStations.add(finalLocation);
       }
-      // If no locations were free, the event is simply discarded from the pool and the loop continues to the next candidate.
     }
   }
 
