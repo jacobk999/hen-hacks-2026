@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { characters, type Character } from "./characters";
 import {
   events,
@@ -6,123 +7,241 @@ import {
   type CurrentEvent,
   type Event,
   type EventOccurence,
+  type EventLog,
 } from "./events";
-import { stats, type Stats } from "./stats";
-import { lines, type Lines } from "./lines";
+import { stats as initialStats, type Stats } from "./stats";
+import { lines as initialLines, type Lines } from "./lines";
 
 export type GameState = {
   eventOccurences: EventOccurence[];
+  eventLog: EventLog[];
   events: Event[];
   currentEvents: CurrentEvent[];
   characters: Character[];
   stats: Stats;
   lines: Lines;
   day: number;
+  isGameOver: boolean;
+  failReason: string;
+  score: number;
 };
 
 type Actions = {
   newDay: () => void;
   onEventUpdate: (event: CurrentEvent, choice: Choice) => void;
   addEvent: (event: Event) => void;
+  resetGame: () => void;
 };
 
-export const useGameStore = create<GameState & Actions>((set) => ({
-  eventOccurences: [],
-  characters,
-  events,
-  currentEvents: [],
-  stats,
-  lines,
-  day: 0,
+export const useGameStore = create<GameState & Actions>()(
+  persist(
+    (set) => ({
+      eventOccurences: [],
+      eventLog: [],
+      characters,
+      events,
+      currentEvents: [],
+      stats: initialStats,
+      lines: initialLines,
+      day: 0,
+      isGameOver: false,
+      failReason: "",
+      score: 0,
 
-  // actions
-  newDay: () =>
-    set((s) => {
-      const stats = s.stats;
+      resetGame: () =>
+        set({
+          day: 0,
+          isGameOver: false,
+          failReason: "",
+          score: 0,
+          stats: initialStats,
+          lines: initialLines,
+          currentEvents: [],
+          eventOccurences: [],
+          eventLog: [],
+        }),
 
-      // --- 1. Mass Resignation Logic ---
-      // If wellbeing < 1.75 (35% of 5 stars), up to 20% leave
-      let employeesLost = 0;
-      const wellbeingPercent = stats.employeeWellbeing / 5;
-      if (wellbeingPercent < 0.35) {
-        // Linear scale: At 35% wellbeing -> 0% leave. At 0% wellbeing -> 20% leave.
-        const leaveRate = ((0.35 - wellbeingPercent) / 0.35) * 0.2;
-        employeesLost = Math.floor(stats.employees * leaveRate);
-      }
-      const finalEmployees = Math.max(0, stats.employees - employeesLost);
+      addEvent: (event) =>
+        set((state) => ({ events: [...state.events, event] })),
 
-      // --- 2. Understaffing Decay ---
-      // Below 30 employees, stats decay. Max decay at 10 employees.
-      let decayMultiplier = 0;
-      if (finalEmployees < 30) {
-        // Scale from   30 (0% decay) down to 10 (100% of max decay)
-        decayMultiplier = Math.min(1, (30 - finalEmployees) / 20);
-      }
+      onEventUpdate: (event, choice) =>
+        set((state) => {
+          const previousStats = state.stats;
+          const choiceResult = choice.onSelect(state) ?? {};
 
-      const applyDecay = (val: number) => {
-        if (decayMultiplier <= 0) return val;
-        const amount = Math.max(val * 0.2, 0.2) * decayMultiplier;
-        return Math.round(Math.max(0, val - amount) * 100) / 100;
-      };
+          const newStats = choiceResult.stats
+            ? { ...previousStats, ...choiceResult.stats }
+            : previousStats;
 
-      // Economy
-      const moneyMultiplier = 0.5 + stats.customerSatisfaction * 0.2;
-      const dailyProfit = stats.dailyProfit * moneyMultiplier;
-      const totalExpenses =
-        finalEmployees * stats.employeeWage + stats.dailyExpenses;
-      const money = stats.money + (dailyProfit - totalExpenses);
+          let effects: { stat: string; change: number }[] = [];
+          const changedKeys = choiceResult.stats
+            ? Object.keys(choiceResult.stats)
+            : [];
 
-      // Event Selection
-      const possibleEvents = s.events.filter((event) => event.criteria(s));
-      const numberOfEvents = Math.floor(Math.random() * 3) + 2;
-      const chosenEvents = selectUniqueEvents(
-        possibleEvents,
-        numberOfEvents,
-        s.lines,
-      );
-      const currentEvents = chosenEvents.map((event) => ({
-        ...event,
-        location: chooseRandomlyFromList(event.locations),
-      }));
+          effects = changedKeys
+            .map((key) => {
+              const k = key as keyof Stats;
+              const delta =
+                Math.round(
+                  ((newStats[k] ?? 0) - (previousStats[k] ?? 0)) * 100,
+                ) / 100;
+              return { stat: k, change: delta };
+            })
+            .filter((e) => e.change !== 0);
 
-      return {
-        day: s.day + 1,
-        currentEvents,
-        stats: {
-          ...stats,
-          money,
-          employees: finalEmployees,
-          totalExpenses,
-          // Apply decay to all quality stats
-          safety: applyDecay(stats.safety),
-          security: applyDecay(stats.security),
-          cleanliness: applyDecay(stats.cleanliness),
-          environment: applyDecay(stats.environment),
-          customerSatisfaction: applyDecay(stats.customerSatisfaction),
-          employeeWellbeing: applyDecay(stats.employeeWellbeing),
-        },
-      };
+          const eventsList = choiceResult?.events ?? state.events;
+
+          const logMessage = choiceResult.customMessage || choice.label;
+          const newLogEntry = {
+            title: event.title,
+            choiceTitle: logMessage,
+            effects: effects,
+          };
+
+          return {
+            ...choiceResult,
+            stats: newStats,
+            eventLog: [...state.eventLog, newLogEntry],
+            events: event.repeatable
+              ? eventsList
+              : eventsList.filter((e) => e.id !== event.id),
+            currentEvents: state.currentEvents.filter(
+              (ce) => ce.id !== event.id,
+            ),
+          };
+        }),
+
+      newDay: () =>
+        set((s) => {
+          const stats = s.stats;
+
+          // Mass Resignation Logic
+          let employeesLost = 0;
+          const wellbeingPercent = stats.employeeWellbeing / 5;
+          if (wellbeingPercent < 0.35) {
+            const leaveRate = ((0.35 - wellbeingPercent) / 0.35) * 0.2;
+            employeesLost = Math.floor(stats.employees * leaveRate);
+          }
+          const finalEmployees = Math.max(0, stats.employees - employeesLost);
+
+          // Understaffing Decay
+          let decayMultiplier = 0;
+          if (finalEmployees < 30) {
+            decayMultiplier = Math.min(1, (30 - finalEmployees) / 20);
+          }
+
+          const applyDecay = (val: number) => {
+            if (decayMultiplier <= 0) return val;
+            const amount = Math.max(val * 0.2, 0.2) * decayMultiplier;
+            return Math.round(Math.max(0, val - amount) * 100) / 100;
+          };
+
+          // Economy
+          const moneyMultiplier = 0.5 + stats.customerSatisfaction * 0.2;
+          const dailyProfit = stats.dailyProfit * moneyMultiplier;
+          const totalExpenses =
+            finalEmployees * stats.employeeWage + stats.dailyExpenses;
+          const money = stats.money + (dailyProfit - totalExpenses);
+
+          // Check Failure Conditions
+          let failReason = "";
+          if (money < 0) {
+            failReason = "BANKRUPTCY: Your have lost all your money.";
+          } else if (finalEmployees <= 10) {
+            failReason = "ABANDONMENT: No one is left to operate the subway.";
+          } else if (stats.customerSatisfaction <= 0) {
+            failReason =
+              "RIOTS: The city has shuttered your station due to public outcry.";
+          }
+
+          if (failReason) {
+            return {
+              isGameOver: true,
+              failReason,
+              score: s.day * 1000,
+              stats: { ...stats, money, employees: finalEmployees },
+            };
+          }
+
+          // Event Selection
+          const possibleEvents = s.events.filter((event) => event.criteria(s));
+          const numberOfEvents = Math.floor(Math.random() * 3) + 2;
+          const chosenEvents = selectUniqueEvents(
+            possibleEvents,
+            numberOfEvents,
+            s.lines,
+          );
+
+          const currentEvents = chosenEvents.map((event) => ({
+            ...event,
+            location: chooseRandomlyFromList(event.locations),
+          }));
+
+          const dayMarker = {
+            title: "New Day Started",
+            choiceTitle: `Day ${s.day + 1}`,
+            effects: [], // You can list daily profits/expenses here!
+          };
+
+          return {
+            day: s.day + 1,
+            eventLog: [...s.eventLog, dayMarker],
+            currentEvents,
+            stats: {
+              ...stats,
+              money,
+              employees: finalEmployees,
+              totalExpenses,
+              safety: applyDecay(stats.safety),
+              security: applyDecay(stats.security),
+              cleanliness: applyDecay(stats.cleanliness),
+              environment: applyDecay(stats.environment),
+              customerSatisfaction: applyDecay(stats.customerSatisfaction),
+              employeeWellbeing: applyDecay(stats.employeeWellbeing),
+            },
+          };
+        }),
     }),
+    // Saving Data
+    {
+      name: "metro-mgmt-save-v1",
+      storage: createJSONStorage(() => localStorage),
 
-  onEventUpdate: (event, choice) =>
-    set((state) => {
-      const choiceUpdates = choice.onSelect(state) ?? {};
-      const events = choiceUpdates?.events ?? state.events;
+      // Save important info and current events
+      partialize: (state) => ({
+        stats: state.stats,
+        lines: state.lines,
+        day: state.day,
+        currentEvents: state.currentEvents,
+        eventOccurences: state.eventOccurences,
+        eventLog: state.eventLog,
+        isGameOver: state.isGameOver,
+        failReason: state.failReason,
+        score: state.score,
+      }),
 
-      return {
-        ...choiceUpdates,
-        events: event.repeatable
-          ? events
-          : events.filter((e) => e.id != event.id),
-        currentEvents: state.currentEvents.filter(
-          (currentEvent) => currentEvent != event,
-        ),
-      };
-    }),
+      // Reattach functions to current events by ID
+      onRehydrateStorage: () => (state) => {
+        if (!state || !state.currentEvents) return;
 
-  addEvent: (event) => set((state) => ({ events: [...state.events, event] })),
-}));
+        state.currentEvents = state.currentEvents.map((persistedEvent) => {
+          const original = events.find((e) => e.id === persistedEvent.id);
 
+          if (original) {
+            // Merge the saved location data with the original's functions
+            return {
+              ...original,
+              location: persistedEvent.location,
+            };
+          }
+          return persistedEvent;
+        });
+      },
+    },
+  ),
+);
+
+// --- Helpers ---
 const chooseRandomlyFromList = <T>(list: T[]) =>
   list[Math.floor(Math.random() * list.length)];
 
@@ -141,7 +260,7 @@ const STATION_LINES: Record<string, string[]> = {
 const selectUniqueEvents = (
   events: Event[],
   x: number,
-  lines: any,
+  lines: Lines,
 ): Event[] => {
   const selected: Event[] = [];
   const pool = [...events];
@@ -159,37 +278,20 @@ const selectUniqueEvents = (
 
     if (pickedIndex !== -1) {
       const [event] = pool.splice(pickedIndex, 1);
-
-      // Filter for stations that have at least one active line
       const reachableLocations = event.locations.filter((loc) => {
         const lineKeys = STATION_LINES[loc] || [];
-
-        // A station is UP if ANY of its lines are true (enabled)
-        const isAccessible = lineKeys.some((key) => {
-          if (key === "red") return lines.red !== false;
-          if (key === "blue") return lines.blue !== false;
-          if (key === "green") return lines.green !== false;
-          return true;
-        });
-
+        const isAccessible = lineKeys.some(
+          (key) => lines[key as keyof Lines] !== false,
+        );
         return isAccessible && !occupiedStations.has(loc);
       });
 
       if (reachableLocations.length > 0) {
-        const finalLocation =
-          reachableLocations[
-            Math.floor(Math.random() * reachableLocations.length)
-          ];
-
-        selected.push({
-          ...event,
-          locations: [finalLocation],
-        });
-
+        const finalLocation = chooseRandomlyFromList(reachableLocations);
+        selected.push({ ...event, locations: [finalLocation] });
         occupiedStations.add(finalLocation);
       }
     }
   }
-
   return selected;
 };

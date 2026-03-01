@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   assetsInclude: ["**/*.woff2"],
   server: {
-    allowedHosts: ["a81d-2600-4040-7c57-1800-00-168f.ngrok-free.app"],
+    allowedHosts: ["ashli-segmentate-elda.ngrok-free.dev"],
   },
   resolve: {
     alias: {

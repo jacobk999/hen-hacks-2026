@@ -1,7 +1,9 @@
 import { SubwayMap } from "./components/subway-map";
 import { Sidebar } from "./components/sidebar";
 import { Train } from "./components/icons/train";
+import { LoseDialog } from "./components/events/lose-screen";
 import { GridBackground } from "./components/ui/grid-background";
+import { ResetButton } from "./components/ui/reset-button";
 
 export function App() {
   return (
@@ -14,6 +16,8 @@ export function App() {
         </div>
         <SubwayMap />
         <Sidebar className="absolute top-8 right-8" />
+        <LoseDialog />
+        <ResetButton />
       </div>
     </div>
   );

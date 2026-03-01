@@ -8,7 +8,7 @@ export const characters: Character[] = [
   {
     id: "bigj",
     name: "Big J",
-    title: "Homeless",
+    title: "Frequent Rider",
   },
   {
     id: "duncan",
@@ -38,7 +38,7 @@ export const characters: Character[] = [
   {
     id: "sathvik",
     name: "Sathvik",
-    title: "Customer",
+    title: "Aspiring Engineer",
   },
   {
     id: "ben",

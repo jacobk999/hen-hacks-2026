@@ -83,6 +83,8 @@ export const updateStats = (
     stats: {
       ...s,
       money: s.money + (c.money ?? 0),
+      dailyProfit: s.dailyProfit + (c.dailyProfit ?? 0),
+      dailyExpenses: s.dailyExpenses + (c.dailyExpenses ?? 0),
       employees: newEmployees,
       employeeWage: employeeWage,
       totalExpenses: totalExpenses,

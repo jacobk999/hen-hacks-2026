@@ -31,7 +31,7 @@ export const LocationMarker = ({
             className="relative rounded-full flex outline-4 outline-white h-full w-full"
           >
             <span className="absolute inline-flex w-full h-full animate-ping rounded-full bg-red-500 opacity-60"></span>
-            <span className="relative inline-flex w-full h-full rounded-full bg-red-500"></span>
+            <span className="relative inline-flex w-full h-full rounded-full bg-red-500 transition-all hover:bg-red-600"></span>
           </button>
         </EventDialog>
       ) : (

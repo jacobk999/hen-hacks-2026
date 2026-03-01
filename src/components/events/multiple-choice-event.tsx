@@ -28,7 +28,7 @@ export function MultipleChoiceEventDialog({
             <Dialog.Close
               key={choice.id}
               onClick={() => onEventUpdate(event, choice)}
-              className="bg-red-500 rounded-lg p-2 font-medium text-white"
+              className="bg-red-500 rounded-lg p-2 font-medium text-white transition-all hover:bg-red-600 hover:scale-102 active:scale-98"
             >
               {choice.label}
             </Dialog.Close>
