@@ -21,7 +21,7 @@ Dialog.Content = ({
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop
         className={cn(
-          "fixed inset-0 min-h-dvh bg-black z-40 opacity-20 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 dark:opacity-70 supports-[-webkit-touch-callout:none]:absolute",
+          "fixed inset-0 min-h-dvh bg-black/20 z-40 transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0",
           blur,
         )}
       />
@@ -49,9 +49,17 @@ Dialog.Title = (
 );
 
 Dialog.Description = (
-  props: Omit<ComponentProps<typeof DialogPrimitive.Description>, "className"> & {
+  props: Omit<
+    ComponentProps<typeof DialogPrimitive.Description>,
+    "className"
+  > & {
     className?: string;
   },
-) => <DialogPrimitive.Description {...props} className={cn("text-md", props.className)} />;
+) => (
+  <DialogPrimitive.Description
+    {...props}
+    className={cn("text-md", props.className)}
+  />
+);
 
 Dialog.Close = DialogPrimitive.Close;

@@ -19,11 +19,18 @@ export function Sidebar({ className }: { className?: string }) {
 
   const eventsCompleted = useGameStore(
     (s) =>
-      s.currentEvents.filter((event) => s.lines[SubwayStationToLine[event.location]]).length === 0,
+      s.currentEvents.filter(
+        (event) => s.lines[SubwayStationToLine[event.location]],
+      ).length === 0,
   );
 
   return (
-    <div className={cn("flex w-[300px] flex-col h-full justify-between", className)}>
+    <div
+      className={cn(
+        "flex w-[300px] flex-col gap-3 h-full justify-between",
+        className,
+      )}
+    >
       <div className="flex flex-col gap-3">
         <SubwayStats />
 

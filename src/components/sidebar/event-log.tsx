@@ -17,9 +17,11 @@ export function EventLog({ className }: { className?: string }) {
         <span className="font-bold text-xs">DAY {day}</span>
       </div>
 
-      <div className="flex-grow overflow-y-auto p-2 space-y-3 scrollbar-hide select-none">
+      <div className="grow overflow-y-auto p-2 space-y-3 select-none scrollbar">
         {eventLog.length === 0 && (
-          <p className="text-slate-black text-xs text-center mt-1.5">No data recorded...</p>
+          <p className="text-slate-black text-xs text-center mt-1.5">
+            No data recorded...
+          </p>
         )}
 
         {eventLog.map((event, index) => {
@@ -33,7 +35,9 @@ export function EventLog({ className }: { className?: string }) {
                 isNewDay ? "border-black mt-0.5" : "border-black",
               )}
             >
-              <p className="font-bold uppercase tracking-tight">{event.title}</p>
+              <p className="font-bold uppercase tracking-tight">
+                {event.title}
+              </p>
 
               {!isNewDay && <p className="italic">{event.choiceTitle}</p>}
 
@@ -49,12 +53,20 @@ export function EventLog({ className }: { className?: string }) {
                     "totalexpenses",
                     "employeewage",
                   ];
-                  const expenseStats = ["dailyexpenses", "totalexpenses", "employeewage"];
+                  const expenseStats = [
+                    "dailyexpenses",
+                    "totalexpenses",
+                    "employeewage",
+                  ];
 
                   // Color logic
                   const isExpense = expenseStats.includes(statKey);
-                  const isGoodChange = isExpense ? effect.change < 0 : effect.change > 0;
-                  const isBadChange = isExpense ? effect.change > 0 : effect.change < 0;
+                  const isGoodChange = isExpense
+                    ? effect.change < 0
+                    : effect.change > 0;
+                  const isBadChange = isExpense
+                    ? effect.change > 0
+                    : effect.change < 0;
 
                   const formattedName = effect.stat
                     .replace(/([A-Z])/g, " $1")
@@ -76,7 +88,8 @@ export function EventLog({ className }: { className?: string }) {
                     displayValue = Math.abs(effect.change);
                   } else {
                     // Percentage for everything else (Happiness, Safety, etc.)
-                    const percentChange = Math.round(effect.change * 20 * 10) / 10;
+                    const percentChange =
+                      Math.round(effect.change * 20 * 10) / 10;
                     displayValue = `${Math.abs(percentChange)}%`;
                   }
 
@@ -92,7 +105,8 @@ export function EventLog({ className }: { className?: string }) {
                             : "text-slate-500",
                       )}
                     >
-                      {formattedName} {effect.change > 0 ? "+" : isNeutral ? "" : "-"}
+                      {formattedName}{" "}
+                      {effect.change > 0 ? "+" : isNeutral ? "" : "-"}
                       {displayValue}
                     </span>
                   );

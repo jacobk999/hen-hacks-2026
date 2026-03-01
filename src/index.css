@@ -18,6 +18,33 @@ button {
   cursor: pointer;
 }
 
+.scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar {
+  &::-webkit-scrollbar {
+    background-color: transparent !important;
+    width: 15px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #334155;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    border-radius: 16px;
+    border: 5px solid transparent;
+    background-clip: content-box;
+  }
+}
+
 @font-face {
   font-family: "Circular Std";
   src: url("./fonts/CircularStd-Book.woff2") format("woff2");

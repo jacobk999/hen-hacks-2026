@@ -10,7 +10,10 @@ export function LoseDialog() {
 
   return (
     <Dialog open={isGameOver}>
-      <Dialog.Content className="border-t-4 border-red-500 bg-slate-200" blur="backdrop-blur-2xl">
+      <Dialog.Content
+        className="border-t-4 border-red-500 bg-slate-200"
+        blur="backdrop-blur-md"
+      >
         <Dialog.Title className="text-center text-4xl font-black text-red-500 uppercase tracking-tighter">
           Terminal Failure
         </Dialog.Title>
@@ -21,11 +24,15 @@ export function LoseDialog() {
 
         <div className="my-8 grid grid-cols-2 gap-4 border-y border-slate-400 py-6">
           <div className="text-center">
-            <span className="block text-sm uppercase font-bold">Days Managed</span>
+            <span className="block text-sm uppercase font-bold">
+              Days Managed
+            </span>
             <span className="text-2xl font-bold">{day}</span>
           </div>
           <div className="text-center">
-            <span className="block text-sm uppercase font-bold">Final Score</span>
+            <span className="block text-sm uppercase font-bold">
+              Final Score
+            </span>
             <span className="text-2xl font-bold">{score.toLocaleString()}</span>
           </div>
         </div>
